@@ -1,3 +1,43 @@
+# WIP!
+
+# Next.js OpenAI Doc Search Template
+
+Building your own custom ChatGPT involves three steps:
+
+1. Pre-process the knowledge base (e.g. Supabase Docs).
+2. Store embeddings in your Supabase Database.
+3. Inject content into GPT-3 prompt.
+
+## Pre-process the knowledge base
+
+### Context injection
+
+1. Search for the most relevant info
+2. Inject into prompt
+
+## Store embeddings in your Supabase Database
+
+## Local Development
+
+This repository consists of two different workspaces:
+
+1. `next-app`: The Next.js app
+2. `supabase-functions`: Deno Supabase Edge Functions
+
+In order for vscode to handle these different workspaces correctly, open the project via the `supaAI.code-workspace` file:
+
+```bash
+code supaAI.code-workspace
+```
+
+###################################
+
+TODO:
+
+- [ ] Add GitHub action to generate embeddings on merge to main.
+
+##################################
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
