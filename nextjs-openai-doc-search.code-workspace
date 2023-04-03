@@ -1,8 +1,12 @@
 {
   "folders": [
     {
-      "name": "next-app",
+      "name": "project-root",
       "path": "./"
+    },
+    {
+      "name": "next-app",
+      "path": "app"
     },
     {
       "name": "supabase-functions",
@@ -12,7 +16,8 @@
   "settings": {
     "files.exclude": {
       "node_modules/": true,
-      "supabase/functions/": true
+      "supabase/functions/": true,
+      "app/": true
     }
   }
 }
