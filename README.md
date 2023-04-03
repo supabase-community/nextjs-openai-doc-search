@@ -27,7 +27,23 @@ This repository consists of two different workspaces:
 In order for vscode to handle these different workspaces correctly, open the project via the `supaAI.code-workspace` file:
 
 ```bash
-code supaAI.code-workspace
+code nextjs-openai-doc-search.code-workspace
+```
+
+### Start Supabase & serve edge functions locally
+
+```bash
+supabase start
+supabase functions serve --env-file supabase/functions/.env
+```
+
+### Start the Next.js App
+
+In a new terminal window, run
+
+```bash
+cd app
+pnpm dev
 ```
 
 ###################################

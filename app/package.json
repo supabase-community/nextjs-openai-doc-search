@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.3",
+    "@radix-ui/react-label": "^2.0.1",
     "@supabase/supabase-js": "^2.13.0",
     "@types/node": "18.15.10",
     "@types/react": "18.0.30",
@@ -32,6 +33,7 @@
     "openai": "^3.2.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "sse.js": "^0.6.1",
     "tailwind-merge": "^1.10.0",
     "tailwindcss-animate": "^1.0.5",
     "typescript": "5.0.2",
