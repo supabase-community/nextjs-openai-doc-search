@@ -30,10 +30,17 @@ In order for vscode to handle these different workspaces correctly, open the pro
 code nextjs-openai-doc-search.code-workspace
 ```
 
-### Start Supabase & serve edge functions locally
+### Start Supabase
 
 ```bash
 supabase start
+```
+
+After you run this, you'll see your environment variables. Rename `app/.env.example` to `app/.env` and put the URL and service role key in this file.
+
+### Start serving edge functions locally
+
+```bash
 supabase functions serve --env-file supabase/functions/.env
 ```
 
