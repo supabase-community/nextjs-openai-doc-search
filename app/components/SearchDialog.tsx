@@ -65,21 +65,12 @@ export function SearchDialog() {
   const [answer, setAnswer] = React.useState<string | undefined>('')
   const edgeFunctionUrl = getEdgeFunctionUrl()
   const eventSourceRef = React.useRef<SSE>()
-  const [isResponding, setIsResponding] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
-  const [hasClippyError, setHasClippyError] = React.useState(false)
+  const [hasError, setHasError] = React.useState(false)
   const [promptIndex, setPromptIndex] = React.useState(0)
   const [promptData, dispatchPromptData] = React.useReducer(promptDataReducer, [])
 
   const cantHelp = answer?.trim() === "Sorry, I don't know how to help with that."
-
-  const status = isLoading
-    ? 'Clippy is searching...'
-    : isResponding
-    ? 'Clippy is responding...'
-    : cantHelp || hasClippyError
-    ? 'Clippy has failed you'
-    : undefined
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -104,8 +95,7 @@ export function SearchDialog() {
     setAnswer(undefined)
     setPromptIndex(0)
     dispatchPromptData({ type: 'remove-last-item' })
-    setIsResponding(false)
-    setHasClippyError(false)
+    setHasError(false)
     setIsLoading(false)
   }
 
@@ -115,11 +105,10 @@ export function SearchDialog() {
       setQuestion(query)
       setSearch('')
       dispatchPromptData({ index: promptIndex, answer: undefined, query })
-      setIsResponding(false)
-      setHasClippyError(false)
+      setHasError(false)
       setIsLoading(true)
 
-      const eventSource = new SSE(`${edgeFunctionUrl}/clippy-search`, {
+      const eventSource = new SSE(`${edgeFunctionUrl}/vector-search`, {
         headers: {
           apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
@@ -130,8 +119,7 @@ export function SearchDialog() {
 
       function handleError<T>(err: T) {
         setIsLoading(false)
-        setIsResponding(false)
-        setHasClippyError(true)
+        setHasError(true)
         console.error(err)
       }
 
@@ -141,14 +129,11 @@ export function SearchDialog() {
           setIsLoading(false)
 
           if (e.data === '[DONE]') {
-            setIsResponding(false)
             setPromptIndex((x) => {
               return x + 1
             })
             return
           }
-
-          setIsResponding(true)
 
           const completionResponse: CreateChatCompletionResponse = JSON.parse(e.data)
           // TODO: figure out why type is incorrect!
@@ -221,15 +206,14 @@ export function SearchDialog() {
                   <p className="mt-0.5 font-semibold">{question}</p>
                 </div>
               )}
-              {/* const status = isLoading ? 'Clippy is searching...' : isResponding ? 'Clippy is responding...' : cantHelp || hasClippyError ?
-              'Clippy has failed you' : undefined */}
+
               {isLoading && (
                 <div className="animate-spin relative flex w-5 h-5 ml-2">
                   <Loader />
                 </div>
               )}
 
-              {hasClippyError && (
+              {hasError && (
                 <div className="flex items-center gap-4">
                   <span className="bg-red-100 p-2 w-8 h-8 rounded-full text-center flex items-center justify-center">
                     <Frown width={18} />
@@ -238,7 +222,7 @@ export function SearchDialog() {
                 </div>
               )}
 
-              {answer && !hasClippyError ? (
+              {answer && !hasError ? (
                 <div className="flex items-center gap-4">
                   <span className="bg-green-500 p-2 w-8 h-8 rounded-full text-center flex items-center justify-center">
                     <Wand width={18} className="text-white" />
