@@ -136,7 +136,7 @@ export function SearchDialog() {
           }
 
           const completionResponse: CreateChatCompletionResponse = JSON.parse(e.data)
-          // TODO: figure out why type is incorrect!
+          // @ts-ignore TODO: figure out why type is incorrect!
           const text = completionResponse.choices[0].text
 
           setAnswer((answer) => {
