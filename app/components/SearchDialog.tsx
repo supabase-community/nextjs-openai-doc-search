@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import type { CreateChatCompletionResponse } from 'openai'
 import { SSE } from 'sse.js'
 import { getEdgeFunctionUrl } from '@/lib/utils'
-import { X, Loader, User, Frown, CornerDownLeft, Search } from 'lucide-react'
+import { X, Loader, User, Frown, CornerDownLeft, Search, Wand } from 'lucide-react'
 
 function promptDataReducer(
   state: any[],
@@ -183,7 +183,7 @@ export function SearchDialog() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="text-base text-slate-500 dark:text-slate-400 flex gap-2 items-center z-50 hover:text-slate-700 transition-colors border border-slate-200 px-4 py-2 rounded-md min-w-[300px] relative"
+        className="text-base text-slate-500 dark:text-slate-400 flex gap-2 items-center z-50 hover:text-slate-700 transition-colors border border-slate-200 hover:border-slate-300 px-4 py-2 rounded-md min-w-[300px] relative"
       >
         <Search width={15} />
         <span className="border border-l h-5"></span>
@@ -226,11 +226,19 @@ export function SearchDialog() {
                   <span className="bg-red-100 p-2 w-8 h-8 rounded-full text-center flex items-center justify-center">
                     <Frown width={18} />
                   </span>
-                  Bad news, the search has failed. Try again later.
+                  Sad news, the search has failed! Please try again.
                 </div>
               )}
 
-              {answer && !hasClippyError ? <p>Answer: {answer}</p> : null}
+              {answer && !hasClippyError ? (
+                <div className="flex items-center gap-4">
+                  <span className="bg-green-500 p-2 w-8 h-8 rounded-full text-center flex items-center justify-center">
+                    <Wand width={18} className="text-white" />
+                  </span>
+                  <h3 className="font-semibold">Answer:</h3>
+                  {answer}
+                </div>
+              ) : null}
 
               <div className="relative">
                 <Input
