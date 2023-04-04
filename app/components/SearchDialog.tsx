@@ -2,11 +2,17 @@
 
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-
-import type { CreateChatCompletionResponse } from 'openai'
 import { SSE } from 'sse.js'
+import type { CreateChatCompletionResponse } from 'openai'
 import { getEdgeFunctionUrl } from '@/lib/utils'
 import { X, Loader, User, Frown, CornerDownLeft, Search, Wand } from 'lucide-react'
 
@@ -196,7 +202,9 @@ export function SearchDialog() {
         <DialogContent className="sm:max-w-[850px] text-black">
           <DialogHeader>
             <DialogTitle>OpenAI powered doc search</DialogTitle>
-            <DialogDescription>Build your own ChatGPT style search with Next.js, OpenAI & Supabase.</DialogDescription>
+            <DialogDescription>
+              Build your own ChatGPT style search with Next.js, OpenAI & Supabase.
+            </DialogDescription>
             <hr />
             <button className="absolute top-0 right-2 p-2" onClick={() => setOpen(false)}>
               <X className="h-4 w-4" />
@@ -249,14 +257,17 @@ export function SearchDialog() {
                   className="col-span-3"
                 />
                 <CornerDownLeft
-                  className={`absolute top-3 right-5 h-4 w-4 text-gray-400 transition-opacity ${search ? 'opacity-100' : 'opacity-0'}`}
+                  className={`absolute top-3 right-5 h-4 w-4 text-gray-400 transition-opacity ${
+                    search ? 'opacity-100' : 'opacity-0'
+                  }`}
                 />
               </div>
               <div className="text-xs text-gray-500">
                 Or try:{' '}
                 <button
+                  type="button"
                   className="px-1.5 py-0.5 bg-slate-50 hover:bg-slate-100  rounded border border-s-slate-200"
-                  onClick={(e) => setSearch('lorem ipsum put a question here?')}
+                  onClick={(_) => setSearch('lorem ipsum put a question here?')}
                 >
                   lorem ipsum put a question here?
                 </button>

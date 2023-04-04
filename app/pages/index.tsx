@@ -12,7 +12,10 @@ export default function Home() {
     <>
       <Head>
         <title>Next.js OpenAI Template</title>
-        <meta name="description" content="Next.js Template for building OpenAI applications with Supabase." />
+        <meta
+          name="description"
+          content="Next.js Template for building OpenAI applications with Supabase."
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -31,12 +34,18 @@ export default function Home() {
           <div className="border-l border-gray-300 w-1 h-4" />
           <div className="flex items-center justify-center space-x-4">
             <div className="opacity-75 transition hover:opacity-100 cursor-pointer">
-              <Link href="https://github.com/supabase/supabase" className="flex items-center justify-center">
+              <Link
+                href="https://github.com/supabase/supabase"
+                className="flex items-center justify-center"
+              >
                 <Image src={'/github.svg'} width="20" height="20" alt="Github logo" />
               </Link>
             </div>
             <div className="opacity-75 transition hover:opacity-100 cursor-pointer">
-              <Link href="https://twitter.com/supabase" className="flex items-center justify-center">
+              <Link
+                href="https://twitter.com/supabase"
+                className="flex items-center justify-center"
+              >
                 <Image src={'/twitter.svg'} width="20" height="20" alt="Twitter logo" />
               </Link>
             </div>
