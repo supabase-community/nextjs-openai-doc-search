@@ -2,12 +2,12 @@
 
 Building your own custom ChatGPT involves three steps:
 
-1. [Build time] Pre-process the knowledge base (your `.mdx` files in your `pages` folder).
-2. [Build time] Store embeddings in Postgres with [pg_vector](https://github.com/pgvector/pgvector).
-3. [Run time] Perform vector similarity search to find the content that's relevant to the question.
-4. [Run time] Inject content into OpenAI GPT-3 text completion prompt and stream response to the client.
+1. [👷 Build time] Pre-process the knowledge base (your `.mdx` files in your `pages` folder).
+2. [👷 Build time] Store embeddings in Postgres with [pg_vector](https://github.com/pgvector/pgvector).
+3. [🏃 Runtime] Perform vector similarity search to find the content that's relevant to the question.
+4. [🏃 Runtime] Inject content into OpenAI GPT-3 text completion prompt and stream response to the client.
 
-## Build time
+## 👷 Build time
 
 Step 1. and 2. happen at build time, e.g. when Vercel builds your Next.js app. During this time the [`generate-embeddings`](./app/lib/generate-embeddings.ts) script is being executed which performs the following tasks:
 
@@ -26,7 +26,7 @@ sequenceDiagram
 
 In addition to storing the embeddings, this script generates a checksum for each of your `.mdx` files and stores this in another database table to make sure the embeddings are only regenerated when the file has changed.
 
-## Run time
+## 🏃 Runtime
 
 Step 3. and 4. happen at runtime, anytime the user submits a question. When this happens, the following sequence of tasks is performed:
 

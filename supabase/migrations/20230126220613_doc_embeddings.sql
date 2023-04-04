@@ -6,6 +6,7 @@ create table "public"."page" (
   checksum text,
   meta jsonb
 );
+alter table "public"."page" enable row level security;
 
 create table "public"."page_section" (
   id bigserial primary key,
@@ -14,3 +15,4 @@ create table "public"."page_section" (
   token_count int,
   embedding vector(1536)
 );
+alter table "public"."page_section" enable row level security;
