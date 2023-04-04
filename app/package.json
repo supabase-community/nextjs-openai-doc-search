@@ -7,7 +7,17 @@
     "build": "pnpm run embeddings && next build",
     "start": "next start",
     "lint": "next lint",
+    "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,css,md,json}\"",
     "embeddings": "tsx lib/generate-embeddings.ts"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true,
+    "printWidth": 100,
+    "endOfLine": "lf",
+    "sqlKeywordCase": "lower"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.3",
@@ -46,6 +56,7 @@
     "autoprefixer": "^10.4.14",
     "dotenv": "^16.0.3",
     "postcss": "^8.4.21",
+    "prettier": "^2.8.7",
     "tailwindcss": "^3.2.7",
     "tsx": "^3.12.6"
   }
