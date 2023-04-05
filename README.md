@@ -1,6 +1,6 @@
 # Next.js OpenAI Doc Search Template
 
-Building your own custom ChatGPT involves three steps:
+Building your own custom ChatGPT involves four steps:
 
 1. [👷 Build time] Pre-process the knowledge base (your `.mdx` files in your `pages` folder).
 2. [👷 Build time] Store embeddings in Postgres with [pg_vector](https://github.com/pgvector/pgvector).
@@ -16,11 +16,13 @@ sequenceDiagram
     participant Vercel
     participant DB (pg_vector)
     participant OpenAI (API)
-    loop Pre-process the knowledge base
+    loop 1. Pre-process the knowledge base
         Vercel->>Vercel: Chunk .mdx pages into sections
-        Vercel->>OpenAI (API): create embedding for page sections
-        OpenAI (API)->>Vercel: embedding vector(1536)
-        Vercel->>DB (pg_vector): store embedding for page section
+        loop 2. Create & store embeddings
+            Vercel->>OpenAI (API): create embedding for page section
+            OpenAI (API)->>Vercel: embedding vector(1536)
+            Vercel->>DB (pg_vector): store embedding for page section
+        end
     end
 ```
 
@@ -37,12 +39,16 @@ sequenceDiagram
     participant DB (pg_vector)
     participant OpenAI (API)
     Client->>Edge Function: { query: lorem ispum }
-    Edge Function->>OpenAI (API): create embedding for query
-    OpenAI (API)->>Edge Function: embedding vector(1536)
-    Edge Function->>DB (pg_vector): vector similarity search
-    DB (pg_vector)->>Edge Function: relevant docs content
-    Edge Function->>OpenAI (API): completion request prompt: query + relevant docs content
-    OpenAI (API)-->>Client: text/event-stream: completions response
+    critical 3. Perform vector similarity search
+        Edge Function->>OpenAI (API): create embedding for query
+        OpenAI (API)->>Edge Function: embedding vector(1536)
+        Edge Function->>DB (pg_vector): vector similarity search
+        DB (pg_vector)->>Edge Function: relevant docs content
+    end
+    critical 4. Inject content into prompt
+        Edge Function->>OpenAI (API): completion request prompt: query + relevant docs content
+        OpenAI (API)-->>Client: text/event-stream: completions response
+    end
 ```
 
 The relevant files for this are the [`SearchDialog` (Client)](./app/components/SearchDialog.tsx) component and the [`vector-search` (Edge Function)](./supabase/functions/vector-search/index.ts).
@@ -93,12 +99,41 @@ pnpm dev
 
 ## Deploy
 
+If you don't have an existing project, create a [new Supabase Project](https://app.supabase.com/projects)!
+
 ### Sync local migrations to your Supabase instance
+
+To sync your local database schema to your hosted Supabase instance you need to link your local project to your hosted instance using your project ref (https://app.supabase.com/project/your-project-ref):
+
+```bash
+supabase link --project-ref=your-project-ref
+```
+
+Now you can push up your local migrations:
+
+```bash
+supabase db push
+```
 
 ### Deploy your Edge Function
 
+Deploy the `vector-search` edge function to your newly linked project:
+
+```bash
+supabase functions deploy vector-search
+supabase secrets set --env-file supabase/functions/.env
+```
+
 ### Deploy the frontend to Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+To deploy the frontend, click the "Deploy with Vercel" button below. Make sure to add the Supabase integration to autimatically set up the environment variables for your project!
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsupabase-community%2Fnextjs-openai-doc-search&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,OPENAI_KEY&project-name=nextjs-openai-doc-search&repository-name=nextjs-openai-doc-search&root-directory=app)
 
 ## Learn More
+
+- Read the blogpost on how we built [ChatGPT for the Supabase Docs](https://supabase.com/blog/chatgpt-supabase-docs).
+- [[Docs] pgvector: Embeddings and vector similarity](https://supabase.com/docs/guides/database/extensions/pgvector)
+- Watch [Greg's](https://twitter.com/ggrdson) "How I built this" [video](https://youtu.be/Yhtjd7yGGGA) on the [Rabbit Hole Syndrome YouTube Channel](https://www.youtube.com/@RabbitHoleSyndrome):
+
+[![Video: How I Built Supabase’s OpenAI Doc Search](https://img.youtube.com/vi/Yhtjd7yGGGA/0.jpg)](https://www.youtube.com/watch?v=Yhtjd7yGGGA)
