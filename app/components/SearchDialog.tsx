@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { SSE } from 'sse.js'
-import type { CreateChatCompletionResponse } from 'openai'
+import type { CreateCompletionResponse } from 'openai'
 import { getEdgeFunctionUrl } from '@/lib/utils'
 import { X, Loader, User, Frown, CornerDownLeft, Search, Wand } from 'lucide-react'
 
@@ -135,8 +135,7 @@ export function SearchDialog() {
             return
           }
 
-          const completionResponse: CreateChatCompletionResponse = JSON.parse(e.data)
-          // @ts-ignore TODO: figure out why type is incorrect!
+          const completionResponse: CreateCompletionResponse = JSON.parse(e.data)
           const text = completionResponse.choices[0].text
 
           setAnswer((answer) => {
