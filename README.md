@@ -1,4 +1,14 @@
-# Next.js OpenAI Doc Search Template
+# Next.js OpenAI Doc Search Starter
+
+This starter takes all the `.mdx` files in the `pages` directory and processes them to use as custom context within [OpenAI Text Completion](https://platform.openai.com/docs/guides/completion) prompts.
+
+## Deploy
+
+Deploy this starter to Vercel. The Supabase integration will automatically set the required environment variables and configure your [Database Schema](./supabase/migrations/20230406025118_init.sql). All you have to do is set your `OPENAI_KEY` and you're ready to go!
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsupabase-community%2Fnextjs-openai-doc-search&env=OPENAI_KEY&project-name=nextjs-openai-doc-search&repository-name=nextjs-openai-doc-search&integration-ids=oac_jUduyjQgOyzev1fjrW83NYOv&external-id=nextjs-open-ai-doc-search)
+
+## Technical Details
 
 Building your own custom ChatGPT involves four steps:
 
@@ -9,7 +19,7 @@ Building your own custom ChatGPT involves four steps:
 
 ## 👷 Build time
 
-Step 1. and 2. happen at build time, e.g. when Vercel builds your Next.js app. During this time the [`generate-embeddings`](./app/lib/generate-embeddings.ts) script is being executed which performs the following tasks:
+Step 1. and 2. happen at build time, e.g. when Vercel builds your Next.js app. During this time the [`generate-embeddings`](./lib/generate-embeddings.ts) script is being executed which performs the following tasks:
 
 ```mermaid
 sequenceDiagram
@@ -51,28 +61,16 @@ sequenceDiagram
     end
 ```
 
-The relevant files for this are the [`SearchDialog` (Client)](./app/components/SearchDialog.tsx) component and the [`vector-search` (Edge Function)](./supabase/functions/vector-search/index.ts).
+The relevant files for this are the [`SearchDialog` (Client)](./components/SearchDialog.tsx) component and the [`vector-search` (Edge Function)](./pages/api/vector-search.ts).
 
 The initialization of the database, including the setup of the `pg_vector` extension is stored in the [`supabase/migrations` folder](./supabase/migrations/) which is automatically applied to your local Postgres instance when running `supabase start`.
 
-## Setup
-
-- `cp app/.env.example app/.env`
-- `cp supabase/functions/.env.example supabase/functions/.env`
-- Set your `OPENAI_KEY` in both the `app/.env` and the `supabase/functions/.env` file.
-
 ## Local Development
 
-This repository consists of two separate workspaces:
+### Configuration
 
-1. `next-app`: The Next.js app
-2. `supabase-functions`: Deno Supabase Edge Functions
-
-In order for vscode to handle the workspaces correctly, open the project via the `nextjs-openai-doc-search.code-workspace` file:
-
-```bash
-code nextjs-openai-doc-search.code-workspace
-```
+- `cp .env.example .env`
+- Set your `OPENAI_KEY` in the newly created `.env` file.
 
 ### Start Supabase
 
@@ -82,53 +80,19 @@ Make sure you have Docker installed and running locally. Then run
 supabase start
 ```
 
-### Serve edge functions locally
-
-```bash
-supabase functions serve --env-file supabase/functions/.env
-```
-
 ### Start the Next.js App
 
 In a new terminal window, run
 
 ```bash
-cd app
 pnpm dev
 ```
 
 ## Deploy
 
-If you don't have an existing project, create a [new Supabase Project](https://app.supabase.com/projects)!
+Deploy this starter to Vercel. The Supabase integration will automatically set the required environment variables and configure your [Database Schema](./supabase/migrations/20230406025118_init.sql). All you have to do is set your `OPENAI_KEY` and you're ready to go!
 
-### Sync local migrations to your Supabase instance
-
-To sync your local database schema to your hosted Supabase instance you need to link your local project to your hosted instance using your project ref (https://app.supabase.com/project/your-project-ref):
-
-```bash
-supabase link --project-ref=your-project-ref
-```
-
-Now you can push up your local migrations:
-
-```bash
-supabase db push
-```
-
-### Deploy your Edge Function
-
-Deploy the `vector-search` edge function to your newly linked project:
-
-```bash
-supabase functions deploy vector-search
-supabase secrets set --env-file supabase/functions/.env
-```
-
-### Deploy the frontend to Vercel
-
-To deploy the frontend, click the "Deploy with Vercel" button below. Make sure to add the Supabase integration to autimatically set up the environment variables for your project!
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsupabase-community%2Fnextjs-openai-doc-search&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,OPENAI_KEY&project-name=nextjs-openai-doc-search&repository-name=nextjs-openai-doc-search&root-directory=app)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsupabase-community%2Fnextjs-openai-doc-search&env=OPENAI_KEY&project-name=nextjs-openai-doc-search&repository-name=nextjs-openai-doc-search&integration-ids=oac_jUduyjQgOyzev1fjrW83NYOv&external-id=nextjs-open-ai-doc-search)
 
 ## Learn More
 
