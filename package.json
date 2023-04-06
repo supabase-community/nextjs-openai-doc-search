@@ -29,9 +29,11 @@
     "class-variance-authority": "^0.4.0",
     "clsx": "^1.2.1",
     "cmdk": "^0.2.0",
+    "common-tags": "^1.8.2",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
     "github-slugger": "^2.0.0",
+    "gpt3-tokenizer": "^1.1.5",
     "lucide-react": "^0.128.0",
     "mdast": "^3.0.0",
     "mdast-util-from-markdown": "^1.2.0",
@@ -51,6 +53,7 @@
     "unist-util-filter": "^4.0.1"
   },
   "devDependencies": {
+    "@types/common-tags": "^1.8.1",
     "@types/estree": "^1.0.0",
     "@types/mdast": "^3.0.11",
     "autoprefixer": "^10.4.14",
