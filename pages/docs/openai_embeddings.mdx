@@ -14,10 +14,10 @@ Overall, OpenAI embeddings are a powerful tool for NLP tasks and have been used 
 
 ## Storing Embeddings in Postgres
 
-`pg_vector` is a Postgres extension that provides support for vector operations, including similarity search and nearest neighbor search. It allows you to store vectors as columns in a database table and perform vector operations on them using SQL queries.
+`pgvector` is a Postgres extension that provides support for vector operations, including similarity search and nearest neighbor search. It allows you to store vectors as columns in a database table and perform vector operations on them using SQL queries.
 
-One interesting use case of `pg_vector` is to use it in conjunction with OpenAI embeddings. Since OpenAI embeddings represent words and phrases as high-dimensional vectors, you can store these vectors in a pg_vector column and use the extension's similarity search capabilities to find similar words or phrases in a large dataset.
+One interesting use case of `pgvector` is to use it in conjunction with OpenAI embeddings. Since OpenAI embeddings represent words and phrases as high-dimensional vectors, you can store these vectors in a pgvector column and use the extension's similarity search capabilities to find similar words or phrases in a large dataset.
 
-For example, let's say you have a database of customer reviews and you want to find all the reviews that mention a particular product. You could use OpenAI embeddings to represent each review as a vector and store these vectors in a pg_vector column. Then, you could perform a similarity search to find all the reviews that are similar to the vector representing the product name.
+For example, let's say you have a database of customer reviews and you want to find all the reviews that mention a particular product. You could use OpenAI embeddings to represent each review as a vector and store these vectors in a pgvector column. Then, you could perform a similarity search to find all the reviews that are similar to the vector representing the product name.
 
 This approach can be very powerful for applications that involve large amounts of text data, as it allows you to perform complex queries on the data using vector operations. However, it does require some additional setup and configuration compared to traditional SQL queries, so it may not be suitable for all use cases.
