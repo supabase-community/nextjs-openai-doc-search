@@ -312,7 +312,7 @@ async function generateEmbeddings() {
 
       // Check for existing page in DB and compare checksums
       const { error: fetchPageError, data: existingPage } = await supabaseClient
-        .from('page')
+        .from('nods_page')
         .select('id, path, checksum, parentPage:parent_page_id(id, path)')
         .filter('path', 'eq', path)
         .limit(1)
@@ -334,7 +334,7 @@ async function generateEmbeddings() {
         if (existingParentPage?.path !== parentPath) {
           console.log(`[${path}] Parent page has changed. Updating to '${parentPath}'...`)
           const { error: fetchParentPageError, data: parentPage } = await supabaseClient
-            .from('page')
+            .from('nods_page')
             .select()
             .filter('path', 'eq', parentPath)
             .limit(1)
@@ -345,7 +345,7 @@ async function generateEmbeddings() {
           }
 
           const { error: updatePageError } = await supabaseClient
-            .from('page')
+            .from('nods_page')
             .update({ parent_page_id: parentPage?.id })
             .filter('id', 'eq', existingPage.id)
 
@@ -366,7 +366,7 @@ async function generateEmbeddings() {
         }
 
         const { error: deletePageSectionError } = await supabaseClient
-          .from('page_section')
+          .from('nods_page_section')
           .delete()
           .filter('page_id', 'eq', existingPage.id)
 
@@ -376,7 +376,7 @@ async function generateEmbeddings() {
       }
 
       const { error: fetchParentPageError, data: parentPage } = await supabaseClient
-        .from('page')
+        .from('nods_page')
         .select()
         .filter('path', 'eq', parentPath)
         .limit(1)
@@ -389,7 +389,7 @@ async function generateEmbeddings() {
       // Create/update page record. Intentionally clear checksum until we
       // have successfully generated all page sections.
       const { error: upsertPageError, data: page } = await supabaseClient
-        .from('page')
+        .from('nods_page')
         .upsert(
           {
             checksum: null,
@@ -432,7 +432,7 @@ async function generateEmbeddings() {
           const [responseData] = embeddingResponse.data.data
 
           const { error: insertPageSectionError, data: pageSection } = await supabaseClient
-            .from('page_section')
+            .from('nods_page_section')
             .insert({
               page_id: page.id,
               slug,
@@ -463,7 +463,7 @@ async function generateEmbeddings() {
 
       // Set page checksum so that we know this page was stored successfully
       const { error: updatePageError } = await supabaseClient
-        .from('page')
+        .from('nods_page')
         .update({ checksum })
         .filter('id', 'eq', page.id)
 
