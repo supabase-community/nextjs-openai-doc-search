@@ -13,7 +13,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { SSE } from 'sse.js'
 import type { CreateCompletionResponse } from 'openai'
-import { getEdgeFunctionUrl } from '@/lib/utils'
 import { X, Loader, User, Frown, CornerDownLeft, Search, Wand } from 'lucide-react'
 
 function promptDataReducer(
@@ -63,7 +62,6 @@ export function SearchDialog() {
   const [search, setSearch] = React.useState<string>('')
   const [question, setQuestion] = React.useState<string>('')
   const [answer, setAnswer] = React.useState<string | undefined>('')
-  const edgeFunctionUrl = getEdgeFunctionUrl()
   const eventSourceRef = React.useRef<SSE>()
   const [isLoading, setIsLoading] = React.useState(false)
   const [hasError, setHasError] = React.useState(false)
@@ -108,7 +106,7 @@ export function SearchDialog() {
       setHasError(false)
       setIsLoading(true)
 
-      const eventSource = new SSE(`${edgeFunctionUrl}/vector-search`, {
+      const eventSource = new SSE(`api/vector-search`, {
         headers: {
           apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
