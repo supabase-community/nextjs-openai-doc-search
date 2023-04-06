@@ -13,7 +13,7 @@ Deploy this starter to Vercel. The Supabase integration will automatically set t
 Building your own custom ChatGPT involves four steps:
 
 1. [👷 Build time] Pre-process the knowledge base (your `.mdx` files in your `pages` folder).
-2. [👷 Build time] Store embeddings in Postgres with [pg_vector](https://github.com/pgvector/pgvector).
+2. [👷 Build time] Store embeddings in Postgres with [pgvector](https://supabase.com/docs/guides/database/extensions/pgvector).
 3. [🏃 Runtime] Perform vector similarity search to find the content that's relevant to the question.
 4. [🏃 Runtime] Inject content into OpenAI GPT-3 text completion prompt and stream response to the client.
 
@@ -24,14 +24,14 @@ Step 1. and 2. happen at build time, e.g. when Vercel builds your Next.js app. D
 ```mermaid
 sequenceDiagram
     participant Vercel
-    participant DB (pg_vector)
+    participant DB (pgvector)
     participant OpenAI (API)
     loop 1. Pre-process the knowledge base
         Vercel->>Vercel: Chunk .mdx pages into sections
         loop 2. Create & store embeddings
             Vercel->>OpenAI (API): create embedding for page section
             OpenAI (API)->>Vercel: embedding vector(1536)
-            Vercel->>DB (pg_vector): store embedding for page section
+            Vercel->>DB (pgvector): store embedding for page section
         end
     end
 ```
@@ -46,14 +46,14 @@ Step 3. and 4. happen at runtime, anytime the user submits a question. When this
 sequenceDiagram
     participant Client
     participant Edge Function
-    participant DB (pg_vector)
+    participant DB (pgvector)
     participant OpenAI (API)
     Client->>Edge Function: { query: lorem ispum }
     critical 3. Perform vector similarity search
         Edge Function->>OpenAI (API): create embedding for query
         OpenAI (API)->>Edge Function: embedding vector(1536)
-        Edge Function->>DB (pg_vector): vector similarity search
-        DB (pg_vector)->>Edge Function: relevant docs content
+        Edge Function->>DB (pgvector): vector similarity search
+        DB (pgvector)->>Edge Function: relevant docs content
     end
     critical 4. Inject content into prompt
         Edge Function->>OpenAI (API): completion request prompt: query + relevant docs content
@@ -63,7 +63,7 @@ sequenceDiagram
 
 The relevant files for this are the [`SearchDialog` (Client)](./components/SearchDialog.tsx) component and the [`vector-search` (Edge Function)](./pages/api/vector-search.ts).
 
-The initialization of the database, including the setup of the `pg_vector` extension is stored in the [`supabase/migrations` folder](./supabase/migrations/) which is automatically applied to your local Postgres instance when running `supabase start`.
+The initialization of the database, including the setup of the `pgvector` extension is stored in the [`supabase/migrations` folder](./supabase/migrations/) which is automatically applied to your local Postgres instance when running `supabase start`.
 
 ## Local Development
 
