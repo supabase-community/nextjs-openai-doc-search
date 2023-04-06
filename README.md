@@ -1,40 +1,83 @@
-# WIP!
+# Next.js OpenAI Doc Search Starter
 
-# Next.js OpenAI Doc Search Template
+This starter takes all the `.mdx` files in the `pages` directory and processes them to use as custom context within [OpenAI Text Completion](https://platform.openai.com/docs/guides/completion) prompts.
 
-Building your own custom ChatGPT involves three steps:
+## Deploy
 
-1. Pre-process the knowledge base (e.g. Supabase Docs).
-2. Store embeddings in your Supabase Database.
-3. Inject content into GPT-3 prompt.
+Deploy this starter to Vercel. The Supabase integration will automatically set the required environment variables and configure your [Database Schema](./supabase/migrations/20230406025118_init.sql). All you have to do is set your `OPENAI_KEY` and you're ready to go!
 
-## Pre-process the knowledge base
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsupabase-community%2Fnextjs-openai-doc-search&env=OPENAI_KEY&project-name=nextjs-openai-doc-search&repository-name=nextjs-openai-doc-search&integration-ids=oac_jUduyjQgOyzev1fjrW83NYOv&external-id=nextjs-open-ai-doc-search)
 
-### Context injection
+## Technical Details
 
-1. Search for the most relevant info
-2. Inject into prompt
+Building your own custom ChatGPT involves four steps:
 
-## Store embeddings in your Supabase Database
+1. [👷 Build time] Pre-process the knowledge base (your `.mdx` files in your `pages` folder).
+2. [👷 Build time] Store embeddings in Postgres with [pgvector](https://supabase.com/docs/guides/database/extensions/pgvector).
+3. [🏃 Runtime] Perform vector similarity search to find the content that's relevant to the question.
+4. [🏃 Runtime] Inject content into OpenAI GPT-3 text completion prompt and stream response to the client.
+
+## 👷 Build time
+
+Step 1. and 2. happen at build time, e.g. when Vercel builds your Next.js app. During this time the [`generate-embeddings`](./lib/generate-embeddings.ts) script is being executed which performs the following tasks:
+
+```mermaid
+sequenceDiagram
+    participant Vercel
+    participant DB (pgvector)
+    participant OpenAI (API)
+    loop 1. Pre-process the knowledge base
+        Vercel->>Vercel: Chunk .mdx pages into sections
+        loop 2. Create & store embeddings
+            Vercel->>OpenAI (API): create embedding for page section
+            OpenAI (API)->>Vercel: embedding vector(1536)
+            Vercel->>DB (pgvector): store embedding for page section
+        end
+    end
+```
+
+In addition to storing the embeddings, this script generates a checksum for each of your `.mdx` files and stores this in another database table to make sure the embeddings are only regenerated when the file has changed.
+
+## 🏃 Runtime
+
+Step 3. and 4. happen at runtime, anytime the user submits a question. When this happens, the following sequence of tasks is performed:
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Edge Function
+    participant DB (pgvector)
+    participant OpenAI (API)
+    Client->>Edge Function: { query: lorem ispum }
+    critical 3. Perform vector similarity search
+        Edge Function->>OpenAI (API): create embedding for query
+        OpenAI (API)->>Edge Function: embedding vector(1536)
+        Edge Function->>DB (pgvector): vector similarity search
+        DB (pgvector)->>Edge Function: relevant docs content
+    end
+    critical 4. Inject content into prompt
+        Edge Function->>OpenAI (API): completion request prompt: query + relevant docs content
+        OpenAI (API)-->>Client: text/event-stream: completions response
+    end
+```
+
+The relevant files for this are the [`SearchDialog` (Client)](./components/SearchDialog.tsx) component and the [`vector-search` (Edge Function)](./pages/api/vector-search.ts).
+
+The initialization of the database, including the setup of the `pgvector` extension is stored in the [`supabase/migrations` folder](./supabase/migrations/) which is automatically applied to your local Postgres instance when running `supabase start`.
 
 ## Local Development
 
-This repository consists of two different workspaces:
+### Configuration
 
-1. `next-app`: The Next.js app
-2. `supabase-functions`: Deno Supabase Edge Functions
+- `cp .env.example .env`
+- Set your `OPENAI_KEY` in the newly created `.env` file.
 
-In order for vscode to handle these different workspaces correctly, open the project via the `supaAI.code-workspace` file:
+### Start Supabase
 
-```bash
-code nextjs-openai-doc-search.code-workspace
-```
-
-### Start Supabase & serve edge functions locally
+Make sure you have Docker installed and running locally. Then run
 
 ```bash
 supabase start
-supabase functions serve --env-file supabase/functions/.env
 ```
 
 ### Start the Next.js App
@@ -42,53 +85,19 @@ supabase functions serve --env-file supabase/functions/.env
 In a new terminal window, run
 
 ```bash
-cd app
 pnpm dev
 ```
 
-###################################
+## Deploy
 
-TODO:
+Deploy this starter to Vercel. The Supabase integration will automatically set the required environment variables and configure your [Database Schema](./supabase/migrations/20230406025118_init.sql). All you have to do is set your `OPENAI_KEY` and you're ready to go!
 
-- [ ] Add GitHub action to generate embeddings on merge to main.
-
-##################################
-
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsupabase-community%2Fnextjs-openai-doc-search&env=OPENAI_KEY&project-name=nextjs-openai-doc-search&repository-name=nextjs-openai-doc-search&integration-ids=oac_jUduyjQgOyzev1fjrW83NYOv&external-id=nextjs-open-ai-doc-search)
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+- Read the blogpost on how we built [ChatGPT for the Supabase Docs](https://supabase.com/blog/chatgpt-supabase-docs).
+- [[Docs] pgvector: Embeddings and vector similarity](https://supabase.com/docs/guides/database/extensions/pgvector)
+- Watch [Greg's](https://twitter.com/ggrdson) "How I built this" [video](https://youtu.be/Yhtjd7yGGGA) on the [Rabbit Hole Syndrome YouTube Channel](https://www.youtube.com/@RabbitHoleSyndrome):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+[![Video: How I Built Supabase’s OpenAI Doc Search](https://img.youtube.com/vi/Yhtjd7yGGGA/0.jpg)](https://www.youtube.com/watch?v=Yhtjd7yGGGA)
