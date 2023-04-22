@@ -1,5 +1,7 @@
 # Next.js OpenAI Doc Search Starter
 
+English | [简体中文](./README.zh_CN.md)
+
 This starter takes all the `.mdx` files in the `pages` directory and processes them to use as custom context within [OpenAI Text Completion](https://platform.openai.com/docs/guides/completion) prompts.
 
 ## Deploy
