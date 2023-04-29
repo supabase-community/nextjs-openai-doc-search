@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,css,md,json}\"",
-    "embeddings": "tsx lib/generate-embeddings.ts"
+    "embeddings": "tsx lib/generate-embeddings.ts",
+    "embeddings:r": "tsx lib/generate-embeddings.ts --refresh"
   },
   "prettier": {
     "trailingComma": "es5",
@@ -50,12 +51,14 @@
     "tailwindcss-animate": "^1.0.5",
     "typescript": "5.0.2",
     "unist-builder": "^3.0.1",
-    "unist-util-filter": "^4.0.1"
+    "unist-util-filter": "^4.0.1",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@types/common-tags": "^1.8.1",
     "@types/estree": "^1.0.0",
     "@types/mdast": "^3.0.11",
+    "@types/yargs": "^17.0.24",
     "autoprefixer": "^10.4.14",
     "dotenv": "^16.0.3",
     "postcss": "^8.4.21",
