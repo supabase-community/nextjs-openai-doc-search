@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input'
 import { SSE } from 'sse.js'
 import type { CreateCompletionResponse } from 'openai'
 import { X, Loader, User, Frown, CornerDownLeft, Search, Wand } from 'lucide-react'
+import { ReactMarkdown } from 'react-markdown/lib/react-markdown'
 
 function promptDataReducer(
   state: any[],
@@ -195,9 +196,13 @@ export function SearchDialog() {
       <Dialog open={open}>
         <DialogContent className="sm:max-w-[850px] text-black">
           <DialogHeader>
-            <DialogTitle>OpenAI powered doc search</DialogTitle>
+            <DialogTitle>Powered by OpenAI</DialogTitle>
             <DialogDescription>
-              Build your own ChatGPT style search with Next.js, OpenAI & Supabase.
+              Search the{' '}
+              <a className="font-semibold underline" href="https://docs.gogopool.com">
+                GoGoPool 🎈 Docs
+              </a>
+              .
             </DialogDescription>
             <hr />
             <button className="absolute top-0 right-2 p-2" onClick={() => setOpen(false)}>
@@ -241,7 +246,7 @@ export function SearchDialog() {
                     <Wand width={18} className="text-white" />
                   </span>
                   <h3 className="font-semibold">Answer:</h3>
-                  {answer}
+                  <ReactMarkdown>{answer}</ReactMarkdown>
                 </div>
               ) : null}
 
@@ -267,12 +272,32 @@ export function SearchDialog() {
                   bg-slate-50 dark:bg-gray-500
                   hover:bg-slate-100 dark:hover:bg-gray-600
                   rounded border border-slate-200 dark:border-slate-600
-                  transition-colors"
-                  onClick={(_) =>
-                    setSearch('Create a table called profiles with fields id, name, email')
-                  }
+                  transition-colors mr-2 ml-1"
+                  onClick={(_) => setSearch('What is GoGoPool?')}
                 >
-                  Create a table called profiles with fields id, name, email
+                  What is GoGoPool?
+                </button>
+                <button
+                  type="button"
+                  className="px-1.5 py-0.5
+                  bg-slate-50 dark:bg-gray-500
+                  hover:bg-slate-100 dark:hover:bg-gray-600
+                  rounded border border-slate-200 dark:border-slate-600
+                  transition-colors mr-2"
+                  onClick={(_) => setSearch('How do I liquid stake on GoGoPool?')}
+                >
+                  How do I liquid stake on GoGoPool?
+                </button>
+                <button
+                  type="button"
+                  className="px-1.5 py-0.5
+                  bg-slate-50 dark:bg-gray-500
+                  hover:bg-slate-100 dark:hover:bg-gray-600
+                  rounded border border-slate-200 dark:border-slate-600
+                  transition-colors mr-2"
+                  onClick={(_) => setSearch('How do I become a node operator on GoGoPool?')}
+                >
+                  How do I become a node operator on GoGoPool?
                 </button>
               </div>
             </div>
