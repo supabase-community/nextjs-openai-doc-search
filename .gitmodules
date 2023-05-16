@@ -1,0 +1,3 @@
+[submodule "pages/docs"]
+	path = pages/docs
+	url = https://github.com/multisig-labs/docs.gogopool.com
