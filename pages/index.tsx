@@ -4,6 +4,7 @@ import styles from '@/styles/Home.module.css'
 import { SearchDialog } from '@/components/SearchDialog'
 import Image from 'next/image'
 import Link from 'next/link'
+import Script from 'next/script'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,8 +18,17 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
+        <Script
+          id="__CONTEXT_BUBBLE__"
+          src="https://portal.usecontext.io/portal/portal.js"
+          data-theme="light"
+          data-type="attribute"
+        ></Script>
         <div className={styles.center}>
           <SearchDialog />
+        </div>
+        <div className="cursor-pointer" context-launcher="true" context-bot-id="pY3LvQEKf">
+          Click to launch Context
         </div>
 
         <div className="py-8 w-full flex items-center justify-center space-x-6">
