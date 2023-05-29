@@ -265,12 +265,11 @@ class MarkdownEmbeddingSource extends BaseEmbeddingSource {
 type EmbeddingSource = MarkdownEmbeddingSource
 
 async function generateEmbeddings() {
-  const argv = await yargs
-    .option('refresh', {
-        alias: 'r',
-        description: 'Refresh data',
-        type: 'boolean',
-    }).argv
+  const argv = await yargs.option('refresh', {
+    alias: 'r',
+    description: 'Refresh data',
+    type: 'boolean',
+  }).argv
 
   const shouldRefresh = argv.refresh
 
