@@ -16,6 +16,7 @@ import { basename, dirname, join } from 'path'
 import { u } from 'unist-builder'
 import { filter } from 'unist-util-filter'
 import { inspect } from 'util'
+import yargs from 'yargs'
 
 dotenv.config()
 
@@ -264,9 +265,13 @@ class MarkdownEmbeddingSource extends BaseEmbeddingSource {
 type EmbeddingSource = MarkdownEmbeddingSource
 
 async function generateEmbeddings() {
-  // TODO: use better CLI lib like yargs
-  const args = process.argv.slice(2)
-  const shouldRefresh = args.includes('--refresh')
+  const argv = await yargs.option('refresh', {
+    alias: 'r',
+    description: 'Refresh data',
+    type: 'boolean',
+  }).argv
+
+  const shouldRefresh = argv.refresh
 
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
