@@ -71,6 +71,8 @@ The initialization of the database, including the setup of the `pgvector` extens
 
 - `cp .env.example .env`
 - Set your `OPENAI_KEY` in the newly created `.env` file.
+- Set `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` run:
+> Note: You have to run supabase to retrieve the keys.
 
 ### Start Supabase
 
@@ -80,6 +82,12 @@ Make sure you have Docker installed and running locally. Then run
 supabase start
 ```
 
+To retrieve `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` run:
+
+```bash
+supabase status
+```
+
 ### Start the Next.js App
 
 In a new terminal window, run
@@ -87,6 +95,12 @@ In a new terminal window, run
 ```bash
 pnpm dev
 ```
+
+### Using your custom .mdx docs
+1. By default your documentation will need to be in `.mdx` format. This can be done by renaming existing (or compatible) markdown `.md` file.
+2. Run `pnpm run embeddings` to regenerate embeddings.
+    > Note: Make sure supabase is running. To check, run `supabase status`. If is not running run `supabase start`.
+3. Run `pnpm dev` again to refresh NextJS localhost:3000 rendered page.
 
 ## Deploy
 
