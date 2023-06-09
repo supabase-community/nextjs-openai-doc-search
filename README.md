@@ -82,7 +82,7 @@ Make sure you have Docker installed and running locally. Then run
 supabase start
 ```
 
-To retrieve ```NEXT_PUBLIC_SUPABASE_ANON_KEY``` and ```SUPABASE_SERVICE_ROLE_KEY``` you have to run
+To retrieve `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` run:
 
 ```bash
 supabase status
