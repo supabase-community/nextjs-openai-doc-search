@@ -42,7 +42,7 @@ export default async function handler(req: NextRequest) {
       throw new UserError('Missing request data')
     }
 
-    const { query } = requestData
+    const { prompt: query } = requestData
 
     if (!query) {
       throw new UserError('Missing query in request data')
