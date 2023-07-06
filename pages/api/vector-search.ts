@@ -7,6 +7,7 @@ import {
   OpenAIApi,
   CreateModerationResponse,
   CreateEmbeddingResponse,
+  ChatCompletionRequestMessage,
 } from 'openai-edge'
 import { OpenAIStream, StreamingTextResponse } from 'ai'
 import { ApplicationError, UserError } from '@/lib/errors'
@@ -130,9 +131,14 @@ export default async function handler(req: NextRequest) {
       Answer as markdown (including related code snippets if available):
     `
 
-    const response = await openai.createCompletion({
-      model: 'text-davinci-003',
-      prompt,
+    const chatMessage: ChatCompletionRequestMessage = {
+      role: 'user',
+      content: prompt,
+    }
+
+    const response = await openai.createChatCompletion({
+      model: 'gpt-3.5-turbo',
+      messages: [chatMessage],
       max_tokens: 512,
       temperature: 0,
       stream: true,
