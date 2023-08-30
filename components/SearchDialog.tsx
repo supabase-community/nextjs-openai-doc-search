@@ -77,9 +77,9 @@ export function SearchDialog() {
       <Dialog open={open}>
         <DialogContent className="sm:max-w-[850px] max-h-[80vh] overflow-y-auto text-black">
           <DialogHeader>
-            <DialogTitle>OpenAI powered doc search</DialogTitle>
+            <DialogTitle>Tra cứu văn bản</DialogTitle>
             <DialogDescription>
-              Build your own ChatGPT style search with Next.js, OpenAI & Supabase.
+              Trợ lý luật sử dụng AI để tra cứu, phân tích và hệ thống hóa văn bản.
             </DialogDescription>
             <hr />
             <button className="absolute top-0 right-2 p-2" onClick={() => setOpen(false)}>
@@ -110,7 +110,7 @@ export function SearchDialog() {
                     <Frown width={18} />
                   </span>
                   <span className="text-slate-700 dark:text-slate-100">
-                    Sad news, the search has failed! Please try again.
+                    Không tìm thấy từ khóa!!!
                   </span>
                 </div>
               )}
@@ -127,7 +127,7 @@ export function SearchDialog() {
 
               <div className="relative">
                 <Input
-                  placeholder="Ask a question..."
+                  placeholder="Bạn cần tìm kiếm..."
                   name="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -150,7 +150,7 @@ export function SearchDialog() {
                   transition-colors"
                   onClick={(_) => setQuery('What are embeddings?')}
                 >
-                  What are embeddings?
+                  VD: Các trường hợp giao đất không thu tiền sử dụng đất?
                 </button>
               </div>
             </div>
