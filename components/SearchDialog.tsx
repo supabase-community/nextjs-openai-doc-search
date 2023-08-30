@@ -140,7 +140,7 @@ export function SearchDialog() {
                 />
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-100">
-                Or try:{' '}
+                Ví dụ:{' '}
                 <button
                   type="button"
                   className="px-1.5 py-0.5
@@ -150,13 +150,13 @@ export function SearchDialog() {
                   transition-colors"
                   onClick={(_) => setQuery('What are embeddings?')}
                 >
-                  VD: Các trường hợp giao đất không thu tiền sử dụng đất?
+                  Các trường hợp giao đất không thu tiền sử dụng đất?
                 </button>
               </div>
             </div>
             <DialogFooter>
               <Button type="submit" className="bg-red-500">
-                Ask
+                Tìm
               </Button>
             </DialogFooter>
           </form>
