@@ -148,9 +148,31 @@ export function SearchDialog() {
                   hover:bg-slate-100 dark:hover:bg-gray-600
                   rounded border border-slate-200 dark:border-slate-600
                   transition-colors"
-                  onClick={(_) => setQuery('What are embeddings?')}
+                  onClick={(_) => setQuery('Các trường hợp giao đất không thu tiền sử dụng đất?')}
                 >
                   Các trường hợp giao đất không thu tiền sử dụng đất?
+                </button>
+                <button
+                  type="button"
+                  className="px-1.5 py-0.5
+                  bg-slate-50 dark:bg-gray-500
+                  hover:bg-slate-100 dark:hover:bg-gray-600
+                  rounded border border-slate-200 dark:border-slate-600
+                  transition-colors"
+                  onClick={(_) => setQuery('Xem toàn bộ Luật Đầu tư')}
+                >
+                  Xem toàn bộ Luật Đầu tư
+                </button>
+                <button
+                  type="button"
+                  className="px-1.5 py-0.5
+                  bg-slate-50 dark:bg-gray-500
+                  hover:bg-slate-100 dark:hover:bg-gray-600
+                  rounded border border-slate-200 dark:border-slate-600
+                  transition-colors"
+                  onClick={(_) => setQuery('Quy chuẩn kỹ thuật quốc gia về xây dựng')}
+                >
+                  Quy chuẩn kỹ thuật quốc gia về xây dựng
                 </button>
               </div>
             </div>
