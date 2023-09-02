@@ -77,9 +77,9 @@ export function SearchDialog() {
       <Dialog open={open}>
         <DialogContent className="sm:max-w-[850px] max-h-[80vh] overflow-y-auto text-black">
           <DialogHeader>
-            <DialogTitle>OpenAI powered doc search</DialogTitle>
+            <DialogTitle>Tra cứu văn bản</DialogTitle>
             <DialogDescription>
-              Build your own ChatGPT style search with Next.js, OpenAI & Supabase.
+              Trợ lý luật sử dụng AI để tra cứu, phân tích và hệ thống hóa văn bản.
             </DialogDescription>
             <hr />
             <button className="absolute top-0 right-2 p-2" onClick={() => setOpen(false)}>
@@ -110,7 +110,7 @@ export function SearchDialog() {
                     <Frown width={18} />
                   </span>
                   <span className="text-slate-700 dark:text-slate-100">
-                    Sad news, the search has failed! Please try again.
+                    Không tìm thấy từ khóa!!!
                   </span>
                 </div>
               )}
@@ -127,7 +127,7 @@ export function SearchDialog() {
 
               <div className="relative">
                 <Input
-                  placeholder="Ask a question..."
+                  placeholder="Bạn cần tìm kiếm..."
                   name="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -140,7 +140,7 @@ export function SearchDialog() {
                 />
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-100">
-                Or try:{' '}
+                Ví dụ:{' '}
                 <button
                   type="button"
                   className="px-1.5 py-0.5
@@ -148,15 +148,37 @@ export function SearchDialog() {
                   hover:bg-slate-100 dark:hover:bg-gray-600
                   rounded border border-slate-200 dark:border-slate-600
                   transition-colors"
-                  onClick={(_) => setQuery('What are embeddings?')}
+                  onClick={(_) => setQuery('Các trường hợp giao đất không thu tiền sử dụng đất?')}
                 >
-                  What are embeddings?
+                  Các trường hợp giao đất không thu tiền sử dụng đất?
+                </button>
+                <button
+                  type="button"
+                  className="px-1.5 py-0.5
+                  bg-slate-50 dark:bg-gray-500
+                  hover:bg-slate-100 dark:hover:bg-gray-600
+                  rounded border border-slate-200 dark:border-slate-600
+                  transition-colors"
+                  onClick={(_) => setQuery('Xem toàn bộ Luật Đầu tư')}
+                >
+                  Xem toàn bộ Luật Đầu tư
+                </button>
+                <button
+                  type="button"
+                  className="px-1.5 py-0.5
+                  bg-slate-50 dark:bg-gray-500
+                  hover:bg-slate-100 dark:hover:bg-gray-600
+                  rounded border border-slate-200 dark:border-slate-600
+                  transition-colors"
+                  onClick={(_) => setQuery('Quy chuẩn kỹ thuật quốc gia về xây dựng')}
+                >
+                  Quy chuẩn kỹ thuật quốc gia về xây dựng
                 </button>
               </div>
             </div>
             <DialogFooter>
               <Button type="submit" className="bg-red-500">
-                Ask
+                Tìm
               </Button>
             </DialogFooter>
           </form>
