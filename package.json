@@ -43,7 +43,7 @@
     "mdast-util-to-markdown": "^1.5.0",
     "mdast-util-to-string": "^3.1.1",
     "micromark-extension-mdxjs": "^1.0.0",
-    "next": "13.2.4",
+    "next": "13.5.0",
     "openai": "^3.3.0",
     "openai-edge": "^1.1.0",
     "react": "18.2.0",
