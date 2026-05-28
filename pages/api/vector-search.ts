@@ -1,34 +1,22 @@
 import type { NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { codeBlock, oneLine } from 'common-tags'
-import GPT3Tokenizer from 'gpt3-tokenizer'
-import {
-  Configuration,
-  OpenAIApi,
-  CreateModerationResponse,
-  CreateEmbeddingResponse,
-  ChatCompletionRequestMessage,
-} from 'openai-edge'
-import { OpenAIStream, StreamingTextResponse } from 'ai'
+import { encode } from 'gpt-tokenizer'
+import { streamText, embedMany } from 'ai'
+import { openai as openaiSdk } from '@ai-sdk/openai'
 import { ApplicationError, UserError } from '@/lib/errors'
+import OpenAI from 'openai'
 
-const openAiKey = process.env.OPENAI_KEY
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-const config = new Configuration({
-  apiKey: openAiKey,
-})
-const openai = new OpenAIApi(config)
 
 export const runtime = 'edge'
 
 export default async function handler(req: NextRequest) {
   try {
-    if (!openAiKey) {
-      throw new ApplicationError('Missing environment variable OPENAI_KEY')
-    }
-
     if (!supabaseUrl) {
       throw new ApplicationError('Missing environment variable SUPABASE_URL')
     }
@@ -43,19 +31,15 @@ export default async function handler(req: NextRequest) {
       throw new UserError('Missing request data')
     }
 
-    const { prompt: query } = requestData
+    const { messages } = requestData
 
-    if (!query) {
-      throw new UserError('Missing query in request data')
-    }
+    const input = messages[messages.length - 1].content
 
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Moderate the content to comply with OpenAI T&C
-    const sanitizedQuery = query.trim()
-    const moderationResponse: CreateModerationResponse = await openai
-      .createModeration({ input: sanitizedQuery })
-      .then((res) => res.json())
+    const moderationResponse = await openai.moderations.create({ input }).catch((error) => {
+      throw new ApplicationError('Moderation error', error)
+    })
 
     const [results] = moderationResponse.results
 
@@ -67,18 +51,14 @@ export default async function handler(req: NextRequest) {
     }
 
     // Create embedding from query
-    const embeddingResponse = await openai.createEmbedding({
-      model: 'text-embedding-ada-002',
-      input: sanitizedQuery.replaceAll('\n', ' '),
+    const embeddingModel = openaiSdk.embedding('text-embedding-ada-002')
+    const chunks = [input.replaceAll('\n', ' ')]
+    const { embeddings } = await embedMany({
+      model: embeddingModel,
+      values: chunks,
     })
 
-    if (embeddingResponse.status !== 200) {
-      throw new ApplicationError('Failed to create embedding for question', embeddingResponse)
-    }
-
-    const {
-      data: [{ embedding }],
-    }: CreateEmbeddingResponse = await embeddingResponse.json()
+    const embedding = embeddings[0]
 
     const { error: matchError, data: pageSections } = await supabaseClient.rpc(
       'match_page_sections',
@@ -94,15 +74,14 @@ export default async function handler(req: NextRequest) {
       throw new ApplicationError('Failed to match page sections', matchError)
     }
 
-    const tokenizer = new GPT3Tokenizer({ type: 'gpt3' })
     let tokenCount = 0
     let contextText = ''
 
     for (let i = 0; i < pageSections.length; i++) {
       const pageSection = pageSections[i]
       const content = pageSection.content
-      const encoded = tokenizer.encode(content)
-      tokenCount += encoded.text.length
+      const encoded = encode(content)
+      tokenCount += encoded.length
 
       if (tokenCount >= 1500) {
         break
@@ -125,35 +104,25 @@ export default async function handler(req: NextRequest) {
       ${contextText}
 
       Question: """
-      ${sanitizedQuery}
+      ${input}
       """
 
       Answer as markdown (including related code snippets if available):
     `
 
-    const chatMessage: ChatCompletionRequestMessage = {
-      role: 'user',
-      content: prompt,
-    }
-
-    const response = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
-      messages: [chatMessage],
-      max_tokens: 512,
+    const result = streamText({
+      model: openaiSdk('gpt-4o-mini'),
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+        ...messages,
+      ],
       temperature: 0,
-      stream: true,
     })
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new ApplicationError('Failed to generate completion', error)
-    }
-
-    // Transform the response into a readable stream
-    const stream = OpenAIStream(response)
-
-    // Return a StreamingTextResponse, which can be consumed by the client
-    return new StreamingTextResponse(stream)
+    return result.toDataStreamResponse()
   } catch (err: unknown) {
     if (err instanceof UserError) {
       return new Response(
@@ -166,9 +135,6 @@ export default async function handler(req: NextRequest) {
           headers: { 'Content-Type': 'application/json' },
         }
       )
-    } else if (err instanceof ApplicationError) {
-      // Print out application errors with their additional data
-      console.error(`${err.message}: ${JSON.stringify(err.data)}`)
     } else {
       // Print out unexpected errors as is to help with debugging
       console.error(err)

@@ -1,6 +1,6 @@
 'use client'
 
-import * as React from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -11,18 +11,24 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { useCompletion } from 'ai/react'
+import { useChat } from '@ai-sdk/react'
 import { X, Loader, User, Frown, CornerDownLeft, Search, Wand } from 'lucide-react'
 
 export function SearchDialog() {
-  const [open, setOpen] = React.useState(false)
-  const [query, setQuery] = React.useState<string>('')
-
-  const { complete, completion, isLoading, error } = useCompletion({
+  const [open, setOpen] = useState(false)
+  const { messages, input, handleInputChange, handleSubmit, status, error, isLoading } = useChat({
     api: '/api/vector-search',
+    onFinish: (message, { usage, finishReason }) => {
+      console.log('Finished streaming message:', message)
+      console.log('Token usage:', usage)
+      console.log('Finish reason:', finishReason)
+    },
+    onError: (error) => {
+      console.error('An error occurred:', error)
+    },
   })
 
-  React.useEffect(() => {
+  useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && e.metaKey) {
         setOpen(true)
@@ -40,13 +46,10 @@ export function SearchDialog() {
 
   function handleModalToggle() {
     setOpen(!open)
-    setQuery('')
   }
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault()
-    console.log(query)
-    complete(query)
+  const clearConversation = () => {
+    handleInputChange({ target: { value: '' } } as ChangeEvent<HTMLInputElement>)
   }
 
   return (
@@ -89,16 +92,33 @@ export function SearchDialog() {
 
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4 text-slate-700">
-              {query && (
-                <div className="flex gap-4">
-                  <span className="bg-slate-100 dark:bg-slate-300 p-2 w-8 h-8 rounded-full text-center flex items-center justify-center">
-                    <User width={18} />{' '}
+              {messages.map((message, index) => (
+                <div key={index} className="flex gap-4">
+                  <span
+                    className={`p-2 w-8 h-8 rounded-full text-center flex items-center justify-center ${
+                      message.role === 'user' ? 'bg-slate-100 dark:bg-slate-300' : 'bg-green-500'
+                    }`}
+                  >
+                    {message.role === 'user' ? (
+                      <User width={18} />
+                    ) : (
+                      <Wand width={18} className="text-white" />
+                    )}
                   </span>
-                  <p className="mt-0.5 font-semibold text-slate-700 dark:text-slate-100">{query}</p>
+                  <div className="mt-0.5 text-slate-700 dark:text-slate-100">
+                    {message.role === 'user' ? (
+                      <p className="font-semibold">{message.content}</p>
+                    ) : (
+                      <div>
+                        <h3 className="font-semibold">Арнольд:</h3>
+                        <div>{message.content}</div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+              ))}
 
-              {isLoading && (
+              {(status === 'streaming' || isLoading) && (
                 <div className="animate-spin relative flex w-5 h-5 ml-2">
                   <Loader />
                 </div>
@@ -115,27 +135,17 @@ export function SearchDialog() {
                 </div>
               )}
 
-              {completion && !error ? (
-                <div className="flex items-center gap-4 dark:text-white">
-                  <span className="bg-green-500 p-2 w-8 h-8 rounded-full text-center flex items-center justify-center">
-                    <Wand width={18} className="text-white" />
-                  </span>
-                  <h3 className="font-semibold">Answer:</h3>
-                  {completion}
-                </div>
-              ) : null}
-
               <div className="relative">
                 <Input
                   placeholder="Ask a question..."
                   name="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  value={input}
+                  onChange={handleInputChange}
                   className="col-span-3"
                 />
                 <CornerDownLeft
                   className={`absolute top-3 right-5 h-4 w-4 text-gray-300 transition-opacity ${
-                    query ? 'opacity-100' : 'opacity-0'
+                    input ? 'opacity-100' : 'opacity-0'
                   }`}
                 />
               </div>
@@ -148,13 +158,22 @@ export function SearchDialog() {
                   hover:bg-slate-100 dark:hover:bg-gray-600
                   rounded border border-slate-200 dark:border-slate-600
                   transition-colors"
-                  onClick={(_) => setQuery('What are embeddings?')}
+                  onClick={(_) =>
+                    handleInputChange({
+                      target: { value: 'What are embeddings?' },
+                    } as ChangeEvent<HTMLInputElement>)
+                  }
                 >
                   What are embeddings?
                 </button>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="flex justify-between">
+              {messages.length > 0 && (
+                <Button type="button" variant="outline" onClick={clearConversation}>
+                  Clear Conversation
+                </Button>
+              )}
               <Button type="submit" className="bg-red-500">
                 Ask
               </Button>

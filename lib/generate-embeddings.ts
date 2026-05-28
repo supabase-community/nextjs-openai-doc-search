@@ -4,19 +4,16 @@ import dotenv from 'dotenv'
 import { ObjectExpression } from 'estree'
 import { readdir, readFile, stat } from 'fs/promises'
 import GithubSlugger from 'github-slugger'
-import { Content, Root } from 'mdast'
-import { fromMarkdown } from 'mdast-util-from-markdown'
-import { mdxFromMarkdown, MdxjsEsm } from 'mdast-util-mdx'
-import { toMarkdown } from 'mdast-util-to-markdown'
-import { toString } from 'mdast-util-to-string'
-import { mdxjs } from 'micromark-extension-mdxjs'
-import 'openai'
-import { Configuration, OpenAIApi } from 'openai'
+import { unified } from 'unified'
+import remarkParse from 'remark-parse'
+import remarkStringify from 'remark-stringify'
+import remarkMdx from 'remark-mdx'
+import { visit } from 'unist-util-visit'
 import { basename, dirname, join } from 'path'
-import { u } from 'unist-builder'
 import { filter } from 'unist-util-filter'
-import { inspect } from 'util'
 import yargs from 'yargs'
+import { embed } from 'ai'
+import { openai } from '@ai-sdk/openai'
 
 dotenv.config()
 
@@ -53,8 +50,8 @@ function getObjectFromExpression(node: ObjectExpression) {
  *
  * This info is akin to frontmatter.
  */
-function extractMetaExport(mdxTree: Root) {
-  const metaExportNode = mdxTree.children.find((node): node is MdxjsEsm => {
+function extractMetaExport(mdxTree: any) {
+  const metaExportNode = mdxTree.children.find((node: any) => {
     return (
       node.type === 'mdxjsEsm' &&
       node.data?.estree?.body[0]?.type === 'ExportNamedDeclaration' &&
@@ -92,12 +89,12 @@ function extractMetaExport(mdxTree: Root) {
  *
  * Useful to split a markdown file into smaller sections.
  */
-function splitTreeBy(tree: Root, predicate: (node: Content) => boolean) {
-  return tree.children.reduce<Root[]>((trees, node) => {
+function splitTreeBy(tree: any, predicate: (node: any) => boolean) {
+  return tree.children.reduce((trees: any[], node: any) => {
     const [lastTree] = trees.slice(-1)
 
     if (!lastTree || predicate(node)) {
-      const tree: Root = u('root', [node])
+      const tree = { type: 'root', children: [node] }
       return trees.concat(tree)
     }
 
@@ -128,10 +125,7 @@ type ProcessedMdx = {
 function processMdxForSearch(content: string): ProcessedMdx {
   const checksum = createHash('sha256').update(content).digest('base64')
 
-  const mdxTree = fromMarkdown(content, {
-    extensions: [mdxjs()],
-    mdastExtensions: [mdxFromMarkdown()],
-  })
+  const mdxTree = unified().use(remarkParse).use(remarkMdx).parse(content)
 
   const meta = extractMetaExport(mdxTree)
 
@@ -156,11 +150,11 @@ function processMdxForSearch(content: string): ProcessedMdx {
     }
   }
 
-  const sectionTrees = splitTreeBy(mdTree, (node) => node.type === 'heading')
+  const sectionTrees = splitTreeBy(mdTree, (node: any) => node.type === 'heading')
 
   const slugger = new GithubSlugger()
 
-  const sections = sectionTrees.map((tree) => {
+  const sections = sectionTrees.map((tree: any) => {
     const [firstNode] = tree.children
 
     const heading = firstNode.type === 'heading' ? toString(firstNode) : undefined
@@ -178,6 +172,16 @@ function processMdxForSearch(content: string): ProcessedMdx {
     meta,
     sections,
   }
+}
+
+const toMarkdown = (tree: any) => unified().use(remarkStringify).stringify(tree)
+
+const toString = (node: any) => {
+  let result = ''
+  visit(node, 'text', (textNode: any) => {
+    result += textNode.value
+  })
+  return result
 }
 
 type WalkEntry = {
@@ -264,7 +268,7 @@ class MarkdownEmbeddingSource extends BaseEmbeddingSource {
 
 type EmbeddingSource = MarkdownEmbeddingSource
 
-async function generateEmbeddings() {
+async function main() {
   const argv = await yargs.option('refresh', {
     alias: 'r',
     description: 'Refresh data',
@@ -273,13 +277,9 @@ async function generateEmbeddings() {
 
   const shouldRefresh = argv.refresh
 
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    !process.env.OPENAI_KEY
-  ) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return console.log(
-      'Environment variables NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and OPENAI_KEY are required: skipping embeddings generation'
+      'Environment variables NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required: skipping embeddings generation'
     )
   }
 
@@ -316,16 +316,12 @@ async function generateEmbeddings() {
       const { checksum, meta, sections } = await embeddingSource.load()
 
       // Check for existing page in DB and compare checksums
-      const { error: fetchPageError, data: existingPage } = await supabaseClient
+      const { data: existingPage } = await supabaseClient
         .from('nods_page')
         .select('id, path, checksum, parentPage:parent_page_id(id, path)')
         .filter('path', 'eq', path)
         .limit(1)
         .maybeSingle()
-
-      if (fetchPageError) {
-        throw fetchPageError
-      }
 
       type Singular<T> = T extends any[] ? undefined : T
 
@@ -338,25 +334,17 @@ async function generateEmbeddings() {
         // If parent page changed, update it
         if (existingParentPage?.path !== parentPath) {
           console.log(`[${path}] Parent page has changed. Updating to '${parentPath}'...`)
-          const { error: fetchParentPageError, data: parentPage } = await supabaseClient
+          const { data: parentPage } = await supabaseClient
             .from('nods_page')
             .select()
             .filter('path', 'eq', parentPath)
             .limit(1)
             .maybeSingle()
 
-          if (fetchParentPageError) {
-            throw fetchParentPageError
-          }
-
-          const { error: updatePageError } = await supabaseClient
+          await supabaseClient
             .from('nods_page')
             .update({ parent_page_id: parentPage?.id })
             .filter('id', 'eq', existingPage.id)
-
-          if (updatePageError) {
-            throw updatePageError
-          }
         }
         continue
       }
@@ -380,16 +368,12 @@ async function generateEmbeddings() {
         }
       }
 
-      const { error: fetchParentPageError, data: parentPage } = await supabaseClient
+      const { data: parentPage } = await supabaseClient
         .from('nods_page')
         .select()
         .filter('path', 'eq', parentPath)
         .limit(1)
         .maybeSingle()
-
-      if (fetchParentPageError) {
-        throw fetchParentPageError
-      }
 
       // Create/update page record. Intentionally clear checksum until we
       // have successfully generated all page sections.
@@ -420,31 +404,20 @@ async function generateEmbeddings() {
         const input = content.replace(/\n/g, ' ')
 
         try {
-          const configuration = new Configuration({
-            apiKey: process.env.OPENAI_KEY,
-          })
-          const openai = new OpenAIApi(configuration)
-
-          const embeddingResponse = await openai.createEmbedding({
-            model: 'text-embedding-ada-002',
-            input,
+          const { embedding, usage } = await embed({
+            model: openai.embedding('text-embedding-ada-002'),
+            value: input,
           })
 
-          if (embeddingResponse.status !== 200) {
-            throw new Error(inspect(embeddingResponse.data, false, 2))
-          }
-
-          const [responseData] = embeddingResponse.data.data
-
-          const { error: insertPageSectionError, data: pageSection } = await supabaseClient
+          const { error: insertPageSectionError } = await supabaseClient
             .from('nods_page_section')
             .insert({
               page_id: page.id,
               slug,
               heading,
               content,
-              token_count: embeddingResponse.data.usage.total_tokens,
-              embedding: responseData.embedding,
+              token_count: usage.tokens,
+              embedding,
             })
             .select()
             .limit(1)
@@ -484,10 +457,19 @@ async function generateEmbeddings() {
   }
 
   console.log('Embedding generation complete')
-}
 
-async function main() {
-  await generateEmbeddings()
+  console.log('Cleaning up obsolete pages...')
+
+  const { error: cleanupError } = await supabaseClient
+    .from('nods_page')
+    .delete()
+    .not('path', 'in', `(${embeddingSources.map((source) => source.path).join(',')})`)
+
+  if (cleanupError) {
+    console.error(`Failed to cleanup obsolete pages:`, cleanupError)
+  }
+
+  console.log('Cleanup complete')
 }
 
 main().catch((err) => console.error(err))
