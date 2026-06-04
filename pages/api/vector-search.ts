@@ -19,7 +19,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 const config = new Configuration({
   apiKey: openAiKey,
-  basePath: openAiBaseUrl,
+  ...(openAiBaseUrl ? { basePath: openAiBaseUrl } : {}),
 })
 const openai = new OpenAIApi(config)
 
